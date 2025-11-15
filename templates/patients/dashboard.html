@@ -1,0 +1,263 @@
+{% extends "layout.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Patient Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('patient_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_appointments') }}">
+                            📅 My Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('book_appointment') }}">
+                            ➕ Book Appointment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_profile') }}">
+                            👤 My Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <!-- Welcome Section -->
+            <div class="welcome-section mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2>Welcome back, {{ session.username }}! 👋</h2>
+                        <p class="mb-0">Manage your healthcare appointments and medical records in one place.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ url_for('book_appointment') }}" class="btn btn-light btn-lg">
+                            📅 Book New Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Appointments</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ appointments|length }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar fa-2x text-gray-300">📅</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Upcoming</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ appointments|selectattr('status', 'equalto', 'Scheduled')|list|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300">⏰</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total Bills</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ bills|length }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-file-invoice fa-2x text-gray-300">💰</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Pending Payments</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ bills|selectattr('payment_status', 'equalto', 'Pending')|list|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-gray-300">⚠️</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- My Appointments -->
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">My Recent Appointments</h6>
+                            <a href="{{ url_for('patient_appointments') }}" class="btn btn-sm btn-outline-primary">
+                                View All
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if appointments %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Doctor</th>
+                                            <th>Specialization</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for appointment in appointments[:5] %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ appointment.doctor_name }}</strong>
+                                            </td>
+                                            <td>{{ appointment.specialization }}</td>
+                                            <td>{{ appointment.appointment_date }}</td>
+                                            <td>{{ appointment.appointment_time }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if appointment.status == 'Completed' else 'warning' if appointment.status == 'Scheduled' else 'secondary' }}">
+                                                    {{ appointment.status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if appointment.status == 'Scheduled' %}
+                                                <button class="btn btn-sm btn-outline-warning">Reschedule</button>
+                                                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                                {% else %}
+                                                <button class="btn btn-sm btn-outline-info">View Details</button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <h5 class="text-muted">No appointments found</h5>
+                                <p class="text-muted">You haven't booked any appointments yet.</p>
+                                <a href="{{ url_for('book_appointment') }}" class="btn btn-primary">
+                                    Book Your First Appointment
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Bills & Quick Actions -->
+                <div class="col-xl-4 col-lg-5">
+                    <!-- My Bills -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">My Bills</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if bills %}
+                                {% for bill in bills[:3] %}
+                                <div class="border-bottom pb-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>₹{{ bill.total_amount }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                Bill #{{ bill.id }} • {{ bill.created_at[:10] }}
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-{{ 'success' if bill.payment_status == 'Paid' else 'warning' }}">
+                                            {{ bill.payment_status }}
+                                        </span>
+                                    </div>
+                                    {% if bill.payment_method %}
+                                    <small class="text-muted">Paid via: {{ bill.payment_method }}</small>
+                                    {% endif %}
+                                    {% if bill.total_with_tax %}
+                                    <div class="mt-1">
+                                        <small><strong>Total with Tax (18%): ₹{{ "%.2f"|format(bill.total_with_tax) }}</strong></small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                                {% if bills|length > 3 %}
+                                <div class="text-center">
+                                    <a href="#" class="btn btn-sm btn-outline-primary">View All Bills</a>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-muted">No bills found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('book_appointment') }}" class="btn btn-outline-primary">
+                                    📅 Book Appointment
+                                </a>
+                                <button class="btn btn-outline-success">📋 View Medical History</button>
+                                <button class="btn btn-outline-warning">💳 Pay Bills Online</button>
+                                <a href="{{ url_for('patient_profile') }}" class="btn btn-outline-info">
+                                    👤 Update Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

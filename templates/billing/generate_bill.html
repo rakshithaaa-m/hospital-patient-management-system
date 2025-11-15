@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+
+{% block title %}Generate Bill - Billing{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Billing Department</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('billing_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('generate_bill') }}">
+                            💰 Generate Bill
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Generate New Bill</h1>
+                <a href="{{ url_for('billing_dashboard') }}" class="btn btn-outline-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">💰 Bill Generation Form</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="POST">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Select Patient</label>
+                                        <select class="form-select" name="patient_id" required>
+                                            <option value="">Choose Patient...</option>
+                                            {% for patient in patients %}
+                                            <option value="{{ patient.id }}">{{ patient.name }} ({{ patient.phone }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Appointment (Optional)</label>
+                                        <select class="form-select" name="appointment_id">
+                                            <option value="">Select Appointment...</option>
+                                            {% for appointment in appointments %}
+                                            <option value="{{ appointment.id }}">Appointment #{{ appointment.id }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Total Amount (₹)</label>
+                                        <input type="number" class="form-control" name="total_amount" 
+                                               placeholder="500.00" step="0.01" min="0" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Payment Method</label>
+                                        <select class="form-select" name="payment_method" required>
+                                            <option value="">Select Method...</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="Card">Credit/Debit Card</option>
+                                            <option value="Online">Online Payment</option>
+                                            <option value="Insurance">Insurance</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Bill Breakdown -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Bill Breakdown (Optional)</label>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Service</th>
+                                                    <th>Quantity</th>
+                                                    <th>Price</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Consultation Fee</td>
+                                                    <td>1</td>
+                                                    <td>₹300.00</td>
+                                                    <td>₹300.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Medicines</td>
+                                                    <td>1</td>
+                                                    <td>₹150.00</td>
+                                                    <td>₹150.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Tests</td>
+                                                    <td>1</td>
+                                                    <td>₹200.00</td>
+                                                    <td>₹200.00</td>
+                                                </tr>
+                                                <tr class="table-info">
+                                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                                    <td><strong>₹650.00</strong></td>
+                                                </tr>
+                                                <tr class="table-warning">
+                                                    <td colspan="3" class="text-end"><strong>GST (18%):</strong></td>
+                                                    <td><strong>₹117.00</strong></td>
+                                                </tr>
+                                                <tr class="table-success">
+                                                    <td colspan="3" class="text-end"><strong>Total Amount:</strong></td>
+                                                    <td><strong>₹767.00</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg py-3">
+                                        💰 Generate Bill
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Billing Information -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">ℹ️ Billing Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Payment Methods Accepted:</h6>
+                                    <ul>
+                                        <li>💵 Cash</li>
+                                        <li>💳 Credit/Debit Card</li>
+                                        <li>🏥 Insurance</li>
+                                        <li>📱 Online Payment</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Tax Information:</h6>
+                                    <ul>
+                                        <li>GST Rate: 18%</li>
+                                        <li>Tax calculated automatically</li>
+                                        <li>Tax-inclusive billing</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr>
+                            <p class="mb-0"><strong>Contact:</strong> billing@hospital.com | +91 9876543210</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

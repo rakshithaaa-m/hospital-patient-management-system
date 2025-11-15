@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+
+{% block title %}My Appointments - Doctor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Doctor Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('doctor_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('doctor_appointments') }}">
+                            📅 My Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('doctor_patients') }}">
+                            👥 My Patients
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">My Appointments</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button class="btn btn-sm btn-outline-secondary">Today</button>
+                        <button class="btn btn-sm btn-outline-secondary">Week</button>
+                        <button class="btn btn-sm btn-outline-secondary">Month</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Table -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">📅 All My Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Appointment ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Contact</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Gender</th>
+                                    <th>Medical History</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td><strong>#{{ appointment.id }}</strong></td>
+                                    <td>
+                                        <strong>{{ appointment.patient_name }}</strong>
+                                    </td>
+                                    <td>{{ appointment.phone }}</td>
+                                    <td>{{ appointment.appointment_date }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ appointment.appointment_time }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'primary' if appointment.gender == 'Male' else 'danger' }}">
+                                            {{ appointment.gender }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ appointment.medical_history|truncate(30) if appointment.medical_history else 'No history' }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'Completed' else 'warning' if appointment.status == 'Scheduled' else 'secondary' }}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('view_patient_records', patient_id=appointment.patient_id) }}" class="btn btn-sm btn-outline-primary">View Records</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <h5 class="text-muted">No appointments found</h5>
+                        <p class="text-muted">You don't have any appointments scheduled.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Appointment Statistics -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-body text-center">
+                            <div class="text-value-lg">
+                                {{ appointments|selectattr('status', 'equalto', 'Scheduled')|list|length }}
+                            </div>
+                            <div>Upcoming Appointments</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-body text-center">
+                            <div class="text-value-lg">
+                                {{ appointments|selectattr('status', 'equalto', 'Completed')|list|length }}
+                            </div>
+                            <div>Completed Today</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body text-center">
+                            <div class="text-value-lg">{{ appointments|length }}</div>
+                            <div>Total Appointments</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

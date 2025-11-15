@@ -1,0 +1,195 @@
+{% extends "layout.html" %}
+
+{% block title %}Book Appointment - Patient{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Patient Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_appointments') }}">
+                            📅 My Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('book_appointment') }}">
+                            ➕ Book Appointment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_profile') }}">
+                            👤 My Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Book New Appointment</h1>
+                <a href="{{ url_for('patient_appointments') }}" class="btn btn-outline-secondary">
+                    ← Back to Appointments
+                </a>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">📅 Schedule Your Appointment</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="POST">
+                                <!-- Doctor Selection -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold h5">Select Doctor</label>
+                                    <p class="text-muted">Choose from our available specialists</p>
+                                    
+                                    {% if doctors %}
+                                        <div class="row">
+                                            {% for doctor in doctors %}
+                                            <div class="col-md-6 mb-3">
+                                                <div class="doctor-card">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="doctor_id" 
+                                                               id="doctor{{ doctor.id }}" value="{{ doctor.id }}" required>
+                                                        <label class="form-check-label w-100" for="doctor{{ doctor.id }}">
+                                                            <div class="p-3 border rounded">
+                                                                <strong class="h6">{{ doctor.name }}</strong>
+                                                                <br>
+                                                                <span class="text-muted">{{ doctor.specialization }}</span>
+                                                                <br>
+                                                                <small class="text-success">✅ Available</small>
+                                                                <br>
+                                                                <small class="text-muted">📞 {{ doctor.phone }}</small>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <h6>⚠️ No Available Doctors</h6>
+                                            <p class="mb-0">No doctors are currently available. Please check back later or contact reception.</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Date and Time -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Appointment Date</label>
+                                        <input type="date" class="form-control" name="appointment_date" 
+                                               min="{{ datetime.now().strftime('%Y-%m-%d') }}" required>
+                                        <small class="text-muted">Select a future date</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Appointment Time</label>
+                                        <input type="time" class="form-control" name="appointment_time" 
+                                               min="09:00" max="17:00" required>
+                                        <small class="text-muted">Clinic hours: 9:00 AM - 5:00 PM</small>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Notes -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Medical Notes (Optional)</label>
+                                    <textarea class="form-control" name="notes" rows="4" 
+                                              placeholder="Please describe your symptoms, concerns, or reason for appointment..."></textarea>
+                                    <small class="text-muted">This helps the doctor prepare for your visit</small>
+                                </div>
+
+
+                                <!-- Submit Buttons -->
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg py-3" 
+                                            {% if not doctors %}disabled{% endif %}>
+                                        📋 Confirm Appointment Booking
+                                    </button>
+                                    <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary btn-lg py-3">
+                                        ← Back to Dashboard
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Help Information -->
+                    <div class="mt-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">📞 Need Help?</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Reception Desk</strong>
+                                        <p class="mb-1">Phone: <strong>+91 9876543210</strong></p>
+                                        <p class="mb-0">Email: reception@hospital.com</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Emergency Services</strong>
+                                        <p class="mb-1">24/7 Emergency: <strong>+91 9876543211</strong></p>
+                                        <p class="mb-0">Available round the clock</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.doctor-card .form-check-input:checked + .form-check-label .border {
+    border-color: #007bff !important;
+    background-color: #e7f1ff;
+}
+.doctor-card .form-check-label .border {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.doctor-card .form-check-label .border:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorCards = document.querySelectorAll('.doctor-card');
+    doctorCards.forEach(card => {
+        const radio = card.querySelector('input[type="radio"]');
+        const label = card.querySelector('.border');
+        
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            doctorCards.forEach(c => {
+                c.querySelector('.border').classList.remove('border-primary', 'bg-light');
+            });
+            // Add selected class to clicked card
+            label.classList.add('border-primary', 'bg-light');
+            // Check the radio button
+            radio.checked = true;
+        });
+    });
+});
+</script>
+{% endblock %}

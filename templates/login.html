@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}Login - Hospital Management{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="card login-card shadow-lg">
+                <div class="card-header text-center py-4">
+                    <h2 class="mb-2">🏥 City Hospital</h2>
+                    <p class="mb-0 text-muted">Management System Login</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('login') }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Username / Email</label>
+                            <input type="text" class="form-control form-control-lg" name="username" 
+                                   placeholder="Enter username or email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Password</label>
+                            <input type="password" class="form-control form-control-lg" name="password" 
+                                   placeholder="Enter password" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Role</label>
+                            <select class="form-select form-select-lg" name="role" required>
+                                <option value="">Choose your role...</option>
+                                <option value="admin">Administrator</option>
+                                <option value="doctor">Doctor</option>
+                                <option value="receptionist">Receptionist</option>
+                                <option value="pharmacy">Pharmacy Staff</option>
+                                <option value="billing">Billing Staff</option>
+                                <option value="patient">Patient</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold">
+                            🔐 Login to System
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "layout.html" %}
+
+{% block title %}Bill #{{ bill.id }} - Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Billing Department</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('billing_dashboard') }}">
+                            Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Bill #{{ bill.id }}</h1>
+                <a href="{{ url_for('billing_dashboard') }}" class="btn btn-outline-secondary">← Back</a>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">Patient</h6>
+                        </div>
+                        <div class="card-body">
+                            <div><strong>{{ bill.patient_name }}</strong></div>
+                            <div class="text-muted">{{ bill.patient_email }}</div>
+                            <div class="text-muted">{{ bill.patient_phone }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">Visit</h6>
+                        </div>
+                        <div class="card-body">
+                            <div>Doctor: <strong>{{ bill.doctor_name or 'N/A' }}</strong> <small class="text-muted">{{ bill.specialization }}</small></div>
+                            <div>Date: <strong>{{ bill.appointment_date or 'N/A' }}</strong> <small class="text-muted">{{ bill.appointment_time or '' }}</small></div>
+                            <div>Status: <span class="badge bg-{{ 'success' if bill.payment_status == 'Paid' else 'warning' }}">{{ bill.payment_status }}</span></div>
+                            <div>Method: <strong>{{ bill.payment_method or 'N/A' }}</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Itemized Charges</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="breakdownTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Service</th>
+                                    <th style="width: 110px;">Quantity</th>
+                                    <th style="width: 140px;">Price (₹)</th>
+                                    <th class="text-end" style="width: 140px;">Total (₹)</th>
+                                    <th style="width: 80px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                                {% if consultation_fee %}
+                                <tr>
+                                    <td>Consultation Fee</td>
+                                    <td><input type="number" class="form-control form-control-sm qty" value="1" min="1" readonly></td>
+                                    <td><input type="number" class="form-control form-control-sm price" value="{{ "%.2f"|format(consultation_fee) }}" step="0.01" readonly></td>
+                                    <td class="text-end row-total"></td>
+                                    <td></td>
+                                </tr>
+                                {% endif %}
+                                {% for pr in prescriptions %}
+                                <tr>
+                                    <td>{{ pr.medicine_name }}</td>
+                                    <td><input type="number" class="form-control form-control-sm qty" value="1" min="1"></td>
+                                    <td><input type="number" class="form-control form-control-sm price" value="{{ "%.2f"|format(pr.price) }}" step="0.01"></td>
+                                    <td class="text-end row-total"></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger remove-btn">Remove</button></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="d-flex gap-2">
+                                            <input type="text" class="form-control form-control-sm" id="newItemName" placeholder="Service name (e.g., Tests)">
+                                            <input type="number" class="form-control form-control-sm" id="newItemQty" placeholder="Qty" min="1" value="1" style="max-width: 110px;">
+                                            <input type="number" class="form-control form-control-sm" id="newItemPrice" placeholder="Price" step="0.01" style="max-width: 140px;">
+                                            <button type="button" class="btn btn-sm btn-primary" id="addItemBtn">Add Item</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-end" colspan="3">Subtotal</th>
+                                    <th class="text-end" id="subtotalCell"></th>
+                                    <th></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-end" colspan="3">Tax (18%)</th>
+                                    <th class="text-end" id="taxCell"></th>
+                                    <th></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-end" colspan="3">Computed Total</th>
+                                    <th class="text-end" id="computedCell"></th>
+                                    <th></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-end" colspan="3">Recorded Total</th>
+                                    <th class="text-end">{{ "%.2f"|format(bill.total_amount) }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <form method="POST" action="{{ url_for('billing_update_total', bill_id=bill.id) }}" class="mt-2">
+                        <input type="hidden" name="computed_total" id="computedTotalInput" value="{{ "%.2f"|format(computed_total) }}">
+                        <button type="submit" class="btn btn-primary btn-sm">Apply Computed Total to Bill</button>
+                        {% if computed_total != bill.total_amount %}
+                        <span class="ms-2 text-warning">Computed total differs from recorded amount.</span>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <form method="POST" action="{{ url_for('billing_receive_payment', bill_id=bill.id) }}" class="d-flex gap-2">
+                    <select name="payment_method" class="form-select form-select-sm" style="max-width: 200px;">
+                        <option value="Cash" selected>Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="Online">Online</option>
+                        <option value="Insurance">Insurance</option>
+                    </select>
+                    <button type="submit" class="btn btn-success btn-sm">Receive Payment</button>
+                </form>
+                <button class="btn btn-outline-secondary">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function recalc() {
+  const rows = document.querySelectorAll('#itemsBody tr');
+  let subtotal = 0;
+  rows.forEach(row => {
+    const qty = parseFloat(row.querySelector('.qty').value) || 0;
+    const price = parseFloat(row.querySelector('.price').value) || 0;
+    const total = qty * price;
+    row.querySelector('.row-total').textContent = total.toFixed(2);
+    subtotal += total;
+  });
+  const tax = +(subtotal * 0.18).toFixed(2);
+  const computed = +(subtotal + tax).toFixed(2);
+  document.getElementById('subtotalCell').textContent = subtotal.toFixed(2);
+  document.getElementById('taxCell').textContent = tax.toFixed(2);
+  document.getElementById('computedCell').textContent = computed.toFixed(2);
+  document.getElementById('computedTotalInput').value = computed.toFixed(2);
+}
+
+document.getElementById('itemsBody').addEventListener('input', e => {
+  if (e.target.classList.contains('qty') || e.target.classList.contains('price')) recalc();
+});
+
+document.getElementById('itemsBody').addEventListener('click', e => {
+  if (e.target.classList.contains('remove-btn')) {
+    e.target.closest('tr').remove();
+    recalc();
+  }
+});
+
+document.getElementById('addItemBtn').addEventListener('click', () => {
+  const name = document.getElementById('newItemName').value.trim();
+  const qty = parseFloat(document.getElementById('newItemQty').value) || 0;
+  const price = parseFloat(document.getElementById('newItemPrice').value) || 0;
+  if (!name || qty <= 0 || price <= 0) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${name}</td>
+    <td><input type="number" class="form-control form-control-sm qty" value="${qty}" min="1"></td>
+    <td><input type="number" class="form-control form-control-sm price" value="${price.toFixed(2)}" step="0.01"></td>
+    <td class="text-end row-total"></td>
+    <td><button type="button" class="btn btn-sm btn-outline-danger remove-btn">Remove</button></td>
+  `;
+  document.getElementById('itemsBody').appendChild(tr);
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemQty').value = 1;
+  document.getElementById('newItemPrice').value = '';
+  recalc();
+});
+
+window.addEventListener('DOMContentLoaded', recalc);
+</script>
+{% endblock %}

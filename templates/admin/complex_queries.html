@@ -1,0 +1,248 @@
+{% extends "layout.html" %}
+
+{% block title %}Complex Queries Demo - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Admin Panel</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            📊 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_doctors') }}">
+                            👨‍⚕️ Manage Doctors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_patients') }}">
+                            👥 Manage Patients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_appointments') }}">
+                            📅 All Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('demo_complex_queries') }}">
+                            🔍 Complex Queries
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Complex Queries Demonstration</h1>
+                <small class="text-muted">DBMS Advanced Features</small>
+            </div>
+
+            <!-- Query 1: Nested Query -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">1. Nested Query</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Query: Find patients who have appointments with busy doctors</h6>
+                    <code class="d-block mb-3 p-3 bg-light rounded">
+                        SELECT name FROM patients <br>
+                        WHERE id IN (<br>
+                        &nbsp;&nbsp;SELECT patient_id FROM appointments <br>
+                        &nbsp;&nbsp;WHERE doctor_id IN (<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;SELECT id FROM doctors WHERE availability = 'Busy'<br>
+                        &nbsp;&nbsp;)<br>
+                        )
+                    </code>
+                    
+                    <h6>Results:</h6>
+                    {% if nested_query %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in nested_query %}
+                                <tr>
+                                    <td>{{ patient.name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No patients found with busy doctors.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Query 2: Join Query -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">2. Join Query</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Query: Show detailed appointment information with patient and doctor details</h6>
+                    <code class="d-block mb-3 p-3 bg-light rounded">
+                        SELECT <br>
+                        &nbsp;&nbsp;p.name as patient_name,<br>
+                        &nbsp;&nbsp;d.name as doctor_name,<br>
+                        &nbsp;&nbsp;d.specialization,<br>
+                        &nbsp;&nbsp;a.appointment_date,<br>
+                        &nbsp;&nbsp;a.status<br>
+                        FROM appointments a<br>
+                        JOIN patients p ON a.patient_id = p.id<br>
+                        JOIN doctors d ON a.doctor_id = d.id<br>
+                        ORDER BY a.appointment_date DESC
+                    </code>
+                    
+                    <h6>Results:</h6>
+                    {% if join_query %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Specialization</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in join_query %}
+                                <tr>
+                                    <td>{{ appointment.patient_name }}</td>
+                                    <td>{{ appointment.doctor_name }}</td>
+                                    <td>{{ appointment.specialization }}</td>
+                                    <td>{{ appointment.appointment_date }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'Completed' else 'warning' }}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No appointment data found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Query 3: Aggregate Query -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">3. Aggregate Query</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Query: Show revenue and appointment statistics by doctor</h6>
+                    <code class="d-block mb-3 p-3 bg-light rounded">
+                        SELECT <br>
+                        &nbsp;&nbsp;d.name,<br>
+                        &nbsp;&nbsp;COUNT(a.id) as total_appointments,<br>
+                        &nbsp;&nbsp;SUM(b.total_amount) as total_revenue<br>
+                        FROM doctors d<br>
+                        LEFT JOIN appointments a ON d.id = a.doctor_id<br>
+                        LEFT JOIN bills b ON a.id = b.appointment_id<br>
+                        GROUP BY d.id
+                    </code>
+                    
+                    <h6>Results:</h6>
+                    {% if aggregate_query %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-info">
+                                <tr>
+                                    <th>Doctor Name</th>
+                                    <th>Total Appointments</th>
+                                    <th>Total Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in aggregate_query %}
+                                <tr>
+                                    <td><strong>{{ doctor.name }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ doctor.total_appointments }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">₹{{ doctor.total_revenue or 0 }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No revenue data found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📊 DBMS Features Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h4>3</h4>
+                                <p class="mb-0">Complex Queries</p>
+                                <small class="text-muted">Nested, Join, Aggregate</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h4>2</h4>
+                                <p class="mb-0">Stored Procedures</p>
+                                <small class="text-muted">DischargePatient, GenerateReport</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h4>3</h4>
+                                <p class="mb-0">Triggers</p>
+                                <small class="text-muted">Auto-update, Alerts</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h4>2</h4>
+                                <p class="mb-0">Functions</p>
+                                <small class="text-muted">CalculateAge, CalculateTax</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h4>6</h4>
+                                <p class="mb-0">User Roles</p>
+                                <small class="text-muted">Complete access control</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

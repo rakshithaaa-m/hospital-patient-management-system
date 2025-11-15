@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}All Appointments - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Admin Panel</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            📊 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_doctors') }}">
+                            👨‍⚕️ Manage Doctors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_patients') }}">
+                            👥 Manage Patients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_appointments') }}">
+                            📅 All Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dbms_features') }}">
+                            🧩 DBMS Features
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">All Appointments</h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary">Today</button>
+                    <button class="btn btn-outline-success">This Week</button>
+                    <button class="btn btn-outline-info">This Month</button>
+                </div>
+            </div>
+
+            <!-- Appointments Table -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">📅 All Scheduled Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Appointment ID</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td><strong>#{{ appointment.id }}</strong></td>
+                                    <td>
+                                        <strong>{{ appointment.patient_name }}</strong>
+                                    </td>
+                                    <td>
+                                        <strong>Dr. {{ appointment.doctor_name }}</strong>
+                                    </td>
+                                    <td>{{ appointment.appointment_date }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ appointment.appointment_time }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'Completed' else 'warning' if appointment.status == 'Scheduled' else 'secondary' }}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ appointment.notes|truncate(30) if appointment.notes else 'No notes' }}</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">View</button>
+                                        <button class="btn btn-sm btn-outline-warning">Reschedule</button>
+                                        <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                        <form method="POST" action="{{ url_for('discharge_patient_action') }}" class="d-inline">
+                                            <input type="hidden" name="patient_id" value="{{ appointment.patient_id }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">Discharge Patient</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <h5 class="text-muted">No appointments found</h5>
+                        <p class="text-muted">No appointments are scheduled in the system.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

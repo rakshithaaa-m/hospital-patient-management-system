@@ -1,0 +1,204 @@
+{% extends "layout.html" %}
+
+{% block title %}Pharmacy Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Pharmacy</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('pharmacy_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('pharmacy_medicines') }}">
+                            💊 Manage Medicines
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <!-- Welcome Section -->
+            <div class="welcome-section mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2>Pharmacy Dashboard 💊</h2>
+                        <p class="mb-0">Manage medicine inventory, prescriptions, and pharmacy operations</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group">
+                            <button class="btn btn-light">Manage Inventory</button>
+                            <button class="btn btn-light">View Prescriptions</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medicine Inventory -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">💊 Medicine Inventory</h6>
+                            <span class="badge bg-primary">{{ medicines|length }} Medicines</span>
+                        </div>
+                        <div class="card-body">
+                            {% if medicines %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Medicine Name</th>
+                                                <th>Description</th>
+                                                <th>Price</th>
+                                                <th>Stock</th>
+                                                <th>Manufacturer</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for medicine in medicines %}
+                                            <tr>
+                                                <td><strong>{{ medicine.name }}</strong></td>
+                                                <td>
+                                                    <small class="text-muted">{{ medicine.description|truncate(30) }}</small>
+                                                </td>
+                                                <td>₹{{ medicine.price }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ 'success' if medicine.stock_quantity > 20 else 'warning' if medicine.stock_quantity > 5 else 'danger' }}">
+                                                        {{ medicine.stock_quantity }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ medicine.manufacturer }}</td>
+                                                <td>
+                                                    {% if medicine.stock_quantity > 20 %}
+                                                    <span class="badge bg-success">In Stock</span>
+                                                    {% elif medicine.stock_quantity > 5 %}
+                                                    <span class="badge bg-warning">Low Stock</span>
+                                                    {% else %}
+                                                    <span class="badge bg-danger">Critical</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                            onclick="updateStock({{ medicine.id }}, {{ medicine.stock_quantity + 10 }})">
+                                                        Restock
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning" 
+                                                            onclick="updateStock({{ medicine.id }}, {{ medicine.stock_quantity - 5 }})">
+                                                        Reduce
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <h5 class="text-muted">No medicines found</h5>
+                                    <p class="text-muted">No medicines are available in inventory.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts & Quick Stats -->
+            <div class="row">
+                <!-- Alerts -->
+                <div class="col-md-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">⚠️ Stock Alerts</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if alerts %}
+                                {% for alert in alerts %}
+                                <div class="alert alert-warning alert-dismissible fade show">
+                                    {{ alert.message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No stock alerts at the moment.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="col-md-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">📊 Pharmacy Stats</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6 mb-3">
+                                    <h3 class="text-primary">{{ medicines|length }}</h3>
+                                    <p class="mb-0">Total Medicines</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <h3 class="text-success">
+                                        {{ medicines|selectattr('stock_quantity', 'gt', 20)|list|length }}
+                                    </h3>
+                                    <p class="mb-0">In Stock</p>
+                                </div>
+                                <div class="col-6">
+                                    <h3 class="text-warning">
+                                        {{ medicines|selectattr('stock_quantity', 'le', 20)|selectattr('stock_quantity', 'gt', 5)|list|length }}
+                                    </h3>
+                                    <p class="mb-0">Low Stock</p>
+                                </div>
+                                <div class="col-6">
+                                    <h3 class="text-danger">
+                                        {{ medicines|selectattr('stock_quantity', 'le', 5)|list|length }}
+                                    </h3>
+                                    <p class="mb-0">Critical</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function updateStock(medicineId, newStock) {
+    fetch('/update-stock/' + medicineId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            stock_quantity: newStock
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Stock updated successfully!');
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating stock');
+    });
+}
+</script>
+{% endblock %}

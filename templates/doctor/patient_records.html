@@ -1,0 +1,198 @@
+{% extends "layout.html" %}
+
+{% block title %}Medical Records - {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Doctor Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('doctor_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('doctor_appointments') }}">
+                            📅 My Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('doctor_patients') }}">
+                            👥 My Patients
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">📋 Medical Records</h1>
+                <a href="{{ url_for('doctor_patients') }}" class="btn btn-outline-secondary">
+                    ← Back to Patients
+                </a>
+            </div>
+
+            <!-- Patient Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">👤 Patient Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ patient.name }}</p>
+                            <p><strong>Age:</strong> {{ age }} years</p>
+                            <p><strong>Gender:</strong> {{ patient.gender }}</p>
+                            <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> {{ patient.email }}</p>
+                            <p><strong>Phone:</strong> {{ patient.phone }}</p>
+                            <p><strong>Emergency Contact:</strong> {{ patient.emergency_contact }}</p>
+                            <p><strong>Address:</strong> {{ patient.address }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical History -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">🏥 Medical History</h5>
+                </div>
+                <div class="card-body">
+                    {% if patient.medical_history %}
+                        <p>{{ patient.medical_history }}</p>
+                    {% else %}
+                        <p class="text-muted">No medical history recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Appointments History -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📅 Appointment History</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    <tr>
+                                        <td>{{ appointment.appointment_date }}</td>
+                                        <td>{{ appointment.appointment_time }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if appointment.status == 'Completed' else 'warning' if appointment.status == 'Scheduled' else 'secondary' }}">
+                                                {{ appointment.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ appointment.notes or 'No notes' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No appointments found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Prescriptions -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">💊 Prescriptions</h5>
+                </div>
+                <div class="card-body">
+                    {% if prescriptions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Medicine</th>
+                                        <th>Dosage</th>
+                                        <th>Duration</th>
+                                        <th>Instructions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prescription in prescriptions %}
+                                    <tr>
+                                        <td>{{ prescription.prescribed_date }}</td>
+                                        <td><strong>{{ prescription.medicine_name }}</strong></td>
+                                        <td>{{ prescription.dosage or 'N/A' }}</td>
+                                        <td>{{ prescription.duration or 'N/A' }}</td>
+                                        <td>{{ prescription.instructions or 'No special instructions' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No prescriptions found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Billing History -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">💰 Billing History</h5>
+                </div>
+                <div class="card-body">
+                    {% if bills %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Payment Status</th>
+                                        <th>Payment Method</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bill in bills %}
+                                    <tr>
+                                        <td>{{ bill.created_at[:10] if bill.created_at else 'N/A' }}</td>
+                                        <td>₹{{ "%.2f"|format(bill.total_amount) }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if bill.payment_status == 'Paid' else 'warning' }}">
+                                                {{ bill.payment_status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ bill.payment_method or 'N/A' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No billing records found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

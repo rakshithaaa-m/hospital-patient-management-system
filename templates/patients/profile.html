@@ -1,0 +1,299 @@
+{% extends "layout.html" %}
+
+{% block title %}My Profile - Patient{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Patient Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('patient_appointments') }}">
+                            📅 My Appointments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('book_appointment') }}">
+                            ➕ Book Appointment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('patient_profile') }}">
+                            👤 My Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">My Profile</h1>
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    ✏️ Edit Profile
+                </button>
+            </div>
+
+            {% if patient %}
+            <div class="row">
+                <!-- Personal Information -->
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">👤 Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Full Name</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">{{ patient.name }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Email</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">{{ patient.email }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Phone</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">{{ patient.phone }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Date of Birth</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">{{ patient.date_of_birth }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Age</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">
+                                        <span class="badge bg-info">{{ age }} years</span>
+                                        <small class="text-muted ms-2">(Calculated automatically)</small>
+                                    </p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Gender</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">
+                                        <span class="badge bg-{{ 'primary' if patient.gender == 'Male' else 'danger' }}">
+                                            {{ patient.gender }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Emergency Contact</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">{{ patient.emergency_contact }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <p class="mb-0"><strong>Address</strong></p>
+                                </div>
+                                <div class="col-sm-9">
+                                    <p class="text-muted mb-0">{{ patient.address }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medical History -->
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h5 class="mb-0">🏥 Medical History</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if patient.medical_history %}
+                            <p class="text-muted">{{ patient.medical_history }}</p>
+                            {% else %}
+                            <p class="text-muted">No medical history recorded.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Information -->
+                <div class="col-lg-4">
+                    <!-- Account Summary -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">📊 Account Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center">
+                                <div class="mb-3">
+                                    <div class="display-4">👤</div>
+                                </div>
+                                <h5>{{ patient.name }}</h5>
+                                <p class="text-muted">Patient ID: #{{ patient.id }}</p>
+                            </div>
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="p-2 border rounded bg-light">
+                                        <div class="h6 mb-0">{{ age }}</div>
+                                        <small class="text-muted">Age</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 border rounded bg-light">
+                                        <div class="h6 mb-0">{{ patient.gender[:1] }}</div>
+                                        <small class="text-muted">Gender</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Quick Actions -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">⚡ Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('book_appointment') }}" class="btn btn-outline-primary">
+                                    📅 Book Appointment
+                                </a>
+                                <button class="btn btn-outline-success">📋 Download Records</button>
+                                <button class="btn btn-outline-warning">🔒 Change Password</button>
+                                <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                    ✏️ Edit Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <h4 class="text-muted">Profile Not Found</h4>
+                <p class="text-muted">Unable to load patient profile information.</p>
+                <a href="{{ url_for('patient_dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('patient_profile_update') }}">
+                    <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" name="name" value="{{ patient.name if patient else '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" value="{{ patient.email if patient else '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-control" name="phone" value="{{ patient.phone if patient else '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Address</label>
+                <input type="text" class="form-control" name="address" value="{{ patient.address if patient else '' }}">
+            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="date_of_birth" id="dobInput" value="{{ patient.date_of_birth if patient else '' }}">
+                            <small class="text-muted d-block mt-1">Age: <span id="dobAge">{{ age }}</span> years</small>
+                        </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Gender</label>
+                <select class="form-select" name="gender">
+                    <option value="Male" {% if patient and patient.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if patient and patient.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if patient and patient.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Emergency Contact</label>
+                <input type="tel" class="form-control" name="emergency_contact" value="{{ patient.emergency_contact if patient else '' }}">
+            </div>
+            <div class="col-12 mb-3">
+                <label class="form-label">Medical History</label>
+                <textarea class="form-control" rows="3" name="medical_history">{{ patient.medical_history if patient else '' }}</textarea>
+            </div>
+        </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+{% block scripts %}
+<script>
+function calcAgeFromDobStr(dobStr){
+  if(!dobStr) return 0;
+  const dob = new Date(dobStr);
+  if(isNaN(dob)) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age < 0 ? 0 : age;
+}
+const dobInput = document.getElementById('dobInput');
+const dobAge = document.getElementById('dobAge');
+function updateDobAge(){ dobAge.textContent = calcAgeFromDobStr(dobInput.value); }
+dobInput && dobInput.addEventListener('input', updateDobAge);
+window.addEventListener('DOMContentLoaded', updateDobAge);
+</script>
+{% endblock %}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

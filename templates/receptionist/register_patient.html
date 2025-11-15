@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block title %}Register Patient - Receptionist{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Reception Desk</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('receptionist_dashboard') }}">
+                            🏠 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('register_patient') }}">
+                            👥 Register Patient
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('manage_appointments') }}">
+                            📅 Manage Appointments
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Register New Patient</h1>
+                <a href="{{ url_for('receptionist_dashboard') }}" class="btn btn-outline-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">👥 Patient Registration Form</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="POST">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <input type="text" class="form-control" name="name" placeholder="John Doe" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Email Address</label>
+                                        <input type="email" class="form-control" name="email" placeholder="patient@email.com" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Phone Number</label>
+                                        <input type="tel" class="form-control" name="phone" placeholder="9876543210" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Date of Birth</label>
+                                        <input type="date" class="form-control" name="date_of_birth" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Gender</label>
+                                        <select class="form-select" name="gender" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Emergency Contact</label>
+                                        <input type="tel" class="form-control" name="emergency_contact" placeholder="Emergency phone number" required>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label fw-bold">Address</label>
+                                        <textarea class="form-control" name="address" rows="2" placeholder="Full residential address" required></textarea>
+                                    </div>
+                                    <div class="col-12 mb-4">
+                                        <label class="form-label fw-bold">Medical History</label>
+                                        <textarea class="form-control" name="medical_history" rows="3" placeholder="Any existing medical conditions, allergies, or previous treatments"></textarea>
+                                        <small class="text-muted">Optional: Provide any relevant medical information</small>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg py-3">
+                                        ✅ Register Patient
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Registration Info -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">ℹ️ Registration Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Patient Login Credentials:</h6>
+                                    <ul class="small">
+                                        <li><strong>Username:</strong> Email address</li>
+                                        <li><strong>Password:</strong> Phone number</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>After Registration:</h6>
+                                    <ul class="small">
+                                        <li>Patient can login immediately</li>
+                                        <li>Can book appointments online</li>
+                                        <li>Access medical records</li>
+                                        <li>View bills and payments</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

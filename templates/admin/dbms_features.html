@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{% block title %}DBMS Features Demo - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Admin Panel</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_doctors') }}">Manage Doctors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_patients') }}">Manage Patients</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_appointments') }}">All Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_dbms_features') }}">DBMS Features</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Stored Procedures & Functions (GUI)</h1>
+            </div>
+
+            <!-- Function 1: Calculate Patient Age -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Function 1 — Calculate Patient Age</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">This function calculates patient age from date of birth. Ages below are computed dynamically.</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th><th>Name</th><th>DOB</th><th>Age</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in patients[:5] %}
+                                <tr>
+                                    <td>#{{ p.id }}</td>
+                                    <td>{{ p.name }}</td>
+                                    <td>{{ p.date_of_birth }}</td>
+                                    <td><span class="badge bg-info">{{ p.age }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Function 2: Calculate Tax -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">Function 2 — Calculate Tax (18% GST)</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">This function adds 18% GST to medical bills. The totals below include tax.</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Bill #</th><th>Patient ID</th><th>Base Amount</th><th>Total with Tax</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in bills[:5] %}
+                                <tr>
+                                    <td>#{{ b.id }}</td>
+                                    <td>{{ b.patient_id }}</td>
+                                    <td>₹{{ "%.2f"|format(b.total_amount) }}</td>
+                                    <td><strong>₹{{ "%.2f"|format(b.total_with_tax) }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Procedure: Discharge Patient -->
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0">Procedure — Discharge Patient</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">This procedure updates appointments, calculates charges, and finalizes pending bills.</p>
+                    <form class="row g-3" method="POST" action="{{ url_for('discharge_patient_action') }}">
+                        <div class="col-auto">
+                            <label class="col-form-label">Patient ID</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="number" class="form-control" name="patient_id" value="2" min="1">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-danger">Discharge</button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">Tip: Try ID 2 (sample data) to see the procedure in action.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

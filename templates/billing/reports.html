@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block title %}Financial Reports - Billing{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Billing Department</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('billing_dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('billing_reports') }}">Financial Reports</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Financial Reports</h1>
+                <form class="d-flex" method="GET" action="{{ url_for('billing_reports') }}">
+                    <input type="number" name="month" class="form-control form-control-sm me-2" value="{{ month }}" min="1" max="12">
+                    <input type="number" name="year" class="form-control form-control-sm me-2" value="{{ year }}" min="2000" max="2100">
+                    <button class="btn btn-primary btn-sm" type="submit">Apply</button>
+                </form>
+            </div>
+
+            <div class="row mb-4 text-center">
+                <div class="col-md-3">
+                    <div class="card stat-card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Bills</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ report['total_bills'] }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₹{{ "%.2f"|format(report['total_revenue'] or 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Average Bill</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₹{{ "%.2f"|format(report['average_bill'] or 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Collected Amount</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₹{{ "%.2f"|format(report['collected_amount'] or 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Monthly Bills (with Tax)</h6>
+                </div>
+                <div class="card-body">
+                    {% if bills %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Bill ID</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Base Amount</th>
+                                    <th>Total with Tax</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in bills %}
+                                <tr>
+                                    <td><strong>#{{ b.id }}</strong></td>
+                                    <td>{{ b.patient_name }}</td>
+                                    <td>{{ b.created_at[:10] }}</td>
+                                    <td>₹{{ "%.2f"|format(b.total_amount) }}</td>
+                                    <td><strong>₹{{ "%.2f"|format(b.total_with_tax) }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if b.payment_status == 'Paid' else 'warning' }}">{{ b.payment_status }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No bills found for the selected month.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
